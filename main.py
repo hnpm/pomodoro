@@ -10,12 +10,13 @@ WORK_DURATION = 1500
 SHORT_BREAK_DURATION = 300
 LONG_BREAK_DURATION = 1200
 rounds = 0
+timer = None
 
 
 def start_timer():
     global rounds
     rounds += 1
-    count_down(WORK_DURATION)
+
     if rounds % 8 == 0:
         count_down(LONG_BREAK_DURATION)
         title_label.config(text="Break", fg=RED)
@@ -36,9 +37,23 @@ def count_down(count):
     canvas.itemconfig(timer_text, text=f"{minutes}:{seconds}")
 
     if count > 0:
-        window.after(1000, count_down, count - 1)
+        global timer
+        timer = window.after(1000, count_down, count - 1)
     else:
         start_timer()
+        marks = ""
+        for _ in range(math.floor(rounds / 2)):
+            marks += "✓"
+        check_marks.config(text=marks)
+
+
+def reset_timer():
+    window.after_cancel(timer)
+    canvas.itemconfig(timer_text, text="0:00")
+    title_label.config(text="Timer")
+    check_marks.config(text="")
+    global rounds
+    rounds = 0
 
 
 window = Tk()
@@ -57,10 +72,10 @@ canvas.grid(column=1, row=1)
 start_button = Button(text="Start", highlightthickness=0, command=start_timer)
 start_button.grid(column=0, row=2)
 
-reset_button = Button(text="Reset", highlightthickness=0)
+reset_button = Button(text="Reset", highlightthickness=0, command=reset_timer)
 reset_button.grid(column=2, row=2)
 
-check_marks = Label(text="✓", fg=GREEN, bg=YELLOW)
+check_marks = Label(fg=GREEN, bg=YELLOW)
 check_marks.grid(column=1, row=3)
 
 window.mainloop()
